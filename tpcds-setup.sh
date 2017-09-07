@@ -1,6 +1,6 @@
 #!/bin/bash
 
-Beeline_connection="jdbc:hive2://lsdna01wpappr.corp.bankofamerica.com:1000/;ssl=true;principal=hive/host@host@BETAVAHADOOP.BANKAMERICA.COM"
+beeline_connection="jdbc:hive2://lsdna01wpappr.corp.bankofamerica.com:1000/;ssl=true;principal=hive/host@host@BETAVAHADOOP.BANKAMERICA.COM"
 
 function usage {
 	echo "Usage: tpcds-setup.sh scale_factor [temp_directory]"
@@ -68,7 +68,7 @@ echo "TPC-DS text data generation complete."
 
 # Create the text/flat tables as external tables. These will be later be converted to ORCFile.
 echo "Loading text data into external tables."
-runcommand "beeline -u $Beeline_connection -i settings/load-flat.sql -f ddl-tpcds/text/alltables.sql -d DB=tpcds_text_${SCALE} -d LOCATION=${DIR}/${SCALE}"
+runcommand "beeline -u $beeline_connection -i settings/load-flat.sql -f ddl-tpcds/text/alltables.sql -d DB=tpcds_text_${SCALE} -d LOCATION=${DIR}/${SCALE}"
 
 # Create the partitioned and bucketed tables.
 if [ "X$FORMAT" = "X" ]; then
@@ -80,7 +80,7 @@ DATABASE=tpcds_bin_partitioned_${FORMAT}_${SCALE}
 for t in ${FACTS}
 do
 	echo "Optimizing table $t ($i/$total)."
-	COMMAND="beeline -u $Beeline_connection -i settings/load-partitioned.sql -f ddl-tpcds/bin_partitioned/${t}.sql \
+	COMMAND="beeline -u $beeline_connection -i settings/load-partitioned.sql -f ddl-tpcds/bin_partitioned/${t}.sql \
 	    -d DB=tpcds_bin_partitioned_${FORMAT}_${SCALE} \
 	    -d SOURCE=tpcds_text_${SCALE} -d BUCKETS=${BUCKETS} \
 	    -d RETURN_BUCKETS=${RETURN_BUCKETS} -d FILE=${FORMAT}"
@@ -96,7 +96,7 @@ done
 for t in ${DIMS}
 do
 	echo "Optimizing table $t ($i/$total)."
-	COMMAND="beeline -u $Beeline_connection -i settings/load-partitioned.sql -f ddl-tpcds/bin_partitioned/${t}.sql \
+	COMMAND="beeline -u $beeline_connection -i settings/load-partitioned.sql -f ddl-tpcds/bin_partitioned/${t}.sql \
 	    -d DB=tpcds_bin_partitioned_${FORMAT}_${SCALE} -d SOURCE=tpcds_text_${SCALE} \
 	    -d FILE=${FORMAT}"
 	runcommand "$COMMAND"
